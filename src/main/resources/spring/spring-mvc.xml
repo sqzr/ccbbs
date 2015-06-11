@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <mvc:view-controller path="/error/notfound" status-code="404"/>
+    <mvc:annotation-driven/>
+    <mvc:default-servlet-handler/>
+
+    <!-- 扫描controller -->
+    <context:component-scan base-package="com.sqzr.ccbbs.**.controller"/>
+
+    <!-- 对静态资源文件的访问-->
+    <mvc:resources mapping="/resources/**" location="/resources/"/>
+
+
+    <!-- 配置SpringMVC的视图解析器,使用beetl做模板引擎 -->
+    <bean name="beetlConfig" class="org.beetl.ext.spring.BeetlGroupUtilConfiguration" init-method="init"/>
+    <bean name="beetlViewResolver" class="org.beetl.ext.spring.BeetlSpringViewResolver">
+        <property name="config" ref="beetlConfig"/>
+        <property name="contentType" value="text/html;charset=UTF-8"/>
+    </bean>
+
+    <!-- 配置返回json支持 -->
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"/>
+            </list>
+        </property>
+    </bean>
+
+</beans>

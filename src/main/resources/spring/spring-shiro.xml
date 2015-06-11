@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--
+        指定本系统SESSIONID, 默认为: JSESSIONID
+        问题: 与SERVLET容器名冲突, 如JETTY, TOMCAT 等默认JSESSIONID,
+        当跳出SHIRO SERVLET时如ERROR-PAGE容器会为JSESSIONID重新分配值导致登录会话丢失!
+    -->
+    <bean id="wapsession" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <constructor-arg name="name" value="authsession"/>
+    </bean>
+    <bean id="PhrRealm" class="com.sqzr.ccbbs.auth.shiro.realm.CCRealm">
+        <property name="credentialsMatcher" ref="md5CredentialsMatcher"/>
+        <!-- 缓存开关,默认为false -->
+        <property name="cachingEnabled" value="true"/>
+        <property name="authorizationCachingEnabled" value="true"/>
+        <property name="authenticationCachingEnabled" value="true"/>
+        <!-- 自定义缓存名 -->
+        <property name="authenticationCacheName" value="authenticationCache"/>
+        <property name="authorizationCacheName" value="authorizationCache"/>
+    </bean>
+
+    <!-- md5凭证匹配器 -->
+    <bean id="md5CredentialsMatcher" class="com.chinamedcom.auth.shiro.authc.credential.Md5CredentialsMatcher"/>
+
+    <!-- shiro redisManager -->
+    <bean id="redisManager" class="com.chinamedcom.auth.shiro.cache.RedisManager">
+        <property name="host" value="192.168.1.202"/>
+        <property name="port" value="6379"/>
+        <property name="expire" value="1800"/>
+        <!--<property name="password" value="cmcRedis200"/>-->
+    </bean>
+
+    <!--由redis做session存储容器-->
+    <bean id="redisSessionDAO" class="com.chinamedcom.auth.shiro.cache.RedisSessionDAO">
+        <property name="redisManager" ref="redisManager"/>
+        <!-- 指定在redis中存放的session前缀名 -->
+        <property name="keyPrefix" value="cmc_shiro_session:"/>
+    </bean>
+
+    <!-- 缓存管理器 -->
+    <bean id="cacheManager" class="com.chinamedcom.auth.shiro.cache.RedisCacheManager">
+        <property name="redisManager" ref="redisManager"/>
+        <!-- 指定在redis中存放的缓存前缀名 -->
+        <property name="keyPrefix" value="cmc_shiro_cache:"/>
+    </bean>
+
+    <!-- 安全管理器 -->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="authenticator" ref="authenticator"/>
+        <property name="cacheManager" ref="cacheManager"/>
+        <property name="sessionManager" ref="sessionManager"/>
+        <property name="realm" ref="PhrRealm"/>
+    </bean>
+
+    <!-- session管理器 -->
+    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <property name="globalSessionTimeout" value="3600000"/>
+        <property name="sessionDAO" ref="redisSessionDAO"/>
+        <!--<property name="sessionIdCookie" ref="wapsession"/>-->
+        <property name="sessionValidationScheduler" ref="sessionValidationScheduler"/>
+        <property name="sessionValidationSchedulerEnabled" value="true"/>
+    </bean>
+
+    <!--
+        定时清理僵尸session，Shiro会启用一个后台守护线程定时执行清理操作
+        用户直接关闭浏览器造成的孤立会话
+    -->
+    <bean id="sessionValidationScheduler"
+          class="org.apache.shiro.session.mgt.ExecutorServiceSessionValidationScheduler">
+        <property name="interval" value="3600000"/>
+        <property name="sessionManager" ref="sessionManager"/>
+    </bean>
+
+    <!-- shiro 过滤器 -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="/auth/login"/>
+        <property name="unauthorizedUrl" value="/auth/unauthorized"/>
+        <property name="filterChainDefinitions">
+            <value>
+                /regional/doctor/** = user,roles[doctor]
+                /regional/resident/** = user,roles[resident]
+            </value>
+        </property>
+    </bean>
+
+    <!-- 认证方式 多realm匹配 -->
+    <bean id="authenticator" class="org.apache.shiro.authc.pam.ModularRealmAuthenticator">
+        <property name="authenticationStrategy">
+            <bean class="org.apache.shiro.authc.pam.FirstSuccessfulStrategy"/>
+        </property>
+    </bean>
+    <!-- 保证实现了Shiro内部lifecycle函数的bean执行 -->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
+    <!-- AOP式方法级权限检查,开启shiro注解 -->
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+          depends-on="lifecycleBeanPostProcessor">
+        <property name="proxyTargetClass" value="true"/>
+    </bean>
+    <bean id="authorizationAttributeSourceAdvisor"
+          class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+    </bean>
+</beans>
+
+
