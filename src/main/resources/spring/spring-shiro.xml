@@ -3,6 +3,16 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+
+    <!-- 读取配置文件 -->
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:conf.properties</value>
+            </list>
+        </property>
+    </bean>
+
     <!--
         指定本系统SESSIONID, 默认为: JSESSIONID
         问题: 与SERVLET容器名冲突, 如JETTY, TOMCAT 等默认JSESSIONID,
@@ -23,28 +33,28 @@
     </bean>
 
     <!-- md5凭证匹配器 -->
-    <bean id="md5CredentialsMatcher" class="com.chinamedcom.auth.shiro.authc.credential.Md5CredentialsMatcher"/>
+    <bean id="md5CredentialsMatcher" class="com.sqzr.ccbbs.auth.shiro.authc.credential.Md5CredentialsMatcher"/>
 
     <!-- shiro redisManager -->
-    <bean id="redisManager" class="com.chinamedcom.auth.shiro.cache.RedisManager">
-        <property name="host" value="192.168.1.202"/>
-        <property name="port" value="6379"/>
-        <property name="expire" value="1800"/>
+    <bean id="redisManager" class="com.sqzr.ccbbs.auth.shiro.cache.RedisManager">
+        <property name="host" value="${redis.host}"/>
+        <property name="port" value="${redis.port}"/>
+        <property name="expire" value="${redis.expire}"/>
         <!--<property name="password" value="cmcRedis200"/>-->
     </bean>
 
     <!--由redis做session存储容器-->
-    <bean id="redisSessionDAO" class="com.chinamedcom.auth.shiro.cache.RedisSessionDAO">
+    <bean id="redisSessionDAO" class="com.sqzr.ccbbs.auth.shiro.cache.RedisSessionDAO">
         <property name="redisManager" ref="redisManager"/>
         <!-- 指定在redis中存放的session前缀名 -->
-        <property name="keyPrefix" value="cmc_shiro_session:"/>
+        <property name="keyPrefix" value="ccbbs_shiro_session:"/>
     </bean>
 
     <!-- 缓存管理器 -->
-    <bean id="cacheManager" class="com.chinamedcom.auth.shiro.cache.RedisCacheManager">
+    <bean id="cacheManager" class="com.sqzr.ccbbs.auth.shiro.cache.RedisCacheManager">
         <property name="redisManager" ref="redisManager"/>
         <!-- 指定在redis中存放的缓存前缀名 -->
-        <property name="keyPrefix" value="cmc_shiro_cache:"/>
+        <property name="keyPrefix" value="ccbbs_shiro_cache:"/>
     </bean>
 
     <!-- 安全管理器 -->
