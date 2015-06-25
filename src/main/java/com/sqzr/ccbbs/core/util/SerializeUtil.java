@@ -5,24 +5,26 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 
+/**
+ * 序列化工具类
+ *
+ * @author sqzr
+ */
 public class SerializeUtil {
 
     private static Logger logger = LoggerFactory.getLogger(SerializeUtil.class);
 
     /**
-     * 鍙嶅簭鍒楀寲
+     * 反序列化
      *
      * @param bytes
      * @return
      */
     public static Object deserialize(byte[] bytes) {
-
         Object result = null;
-
         if (isEmpty(bytes)) {
             return null;
         }
-
         try {
             ByteArrayInputStream byteStream = new ByteArrayInputStream(bytes);
             try {
@@ -44,17 +46,14 @@ public class SerializeUtil {
     public static boolean isEmpty(byte[] data) {
         return (data == null || data.length == 0);
     }
-
     /**
-     * 搴忓垪鍖?
+     * 序列化对象
      *
      * @param object
      * @return
      */
     public static byte[] serialize(Object object) {
-
         byte[] result = null;
-
         if (object == null) {
             return new byte[0];
         }

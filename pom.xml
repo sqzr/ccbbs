@@ -16,6 +16,7 @@
         <lombok.version>1.16.4</lombok.version>
         <spring.version>4.1.5.RELEASE</spring.version>
         <spring.dao.version>2.0.8</spring.dao.version>
+        <spring.data.redis.version>1.5.0.RELEASE</spring.data.redis.version>
         <spring.data.version>1.8.0.RELEASE</spring.data.version>
         <jackson.version>2.2.2</jackson.version>
         <mysql-connector-java.version>5.1.35</mysql-connector-java.version>
@@ -151,6 +152,11 @@
             <version>${beetl.version}</version>
         </dependency>
         <!-- redis 连接驱动 start -->
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+            <version>${spring.data.redis.version}</version>
+        </dependency>
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>

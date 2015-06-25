@@ -4,74 +4,46 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 
-    <!-- 读取配置文件 -->
-    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="locations">
-            <list>
-                <value>classpath:conf.properties</value>
-            </list>
-        </property>
-    </bean>
-
-    <!--
-        指定本系统SESSIONID, 默认为: JSESSIONID
-        问题: 与SERVLET容器名冲突, 如JETTY, TOMCAT 等默认JSESSIONID,
-        当跳出SHIRO SERVLET时如ERROR-PAGE容器会为JSESSIONID重新分配值导致登录会话丢失!
-    -->
-    <bean id="wapsession" class="org.apache.shiro.web.servlet.SimpleCookie">
-        <constructor-arg name="name" value="authsession"/>
-    </bean>
-    <bean id="PhrRealm" class="com.sqzr.ccbbs.auth.shiro.realm.CCRealm">
+    <bean id="ccRealm" class="com.sqzr.ccbbs.auth.shiro.realm.CCRealm">
         <property name="credentialsMatcher" ref="md5CredentialsMatcher"/>
         <!-- 缓存开关,默认为false -->
         <property name="cachingEnabled" value="true"/>
         <property name="authorizationCachingEnabled" value="true"/>
         <property name="authenticationCachingEnabled" value="true"/>
         <!-- 自定义缓存名 -->
-        <property name="authenticationCacheName" value="authenticationCache"/>
-        <property name="authorizationCacheName" value="authorizationCache"/>
+        <property name="authenticationCacheName" value="${shiro.authenticationCacheName}"/>
+        <property name="authorizationCacheName" value="${shiro.authorizationCacheName}"/>
     </bean>
 
     <!-- md5凭证匹配器 -->
     <bean id="md5CredentialsMatcher" class="com.sqzr.ccbbs.auth.shiro.authc.credential.Md5CredentialsMatcher"/>
 
-    <!-- shiro redisManager -->
-    <bean id="redisManager" class="com.sqzr.ccbbs.auth.shiro.cache.RedisManager">
-        <property name="host" value="${redis.host}"/>
-        <property name="port" value="${redis.port}"/>
-        <property name="expire" value="${redis.expire}"/>
-        <!--<property name="password" value="cmcRedis200"/>-->
-    </bean>
-
     <!--由redis做session存储容器-->
-    <bean id="redisSessionDAO" class="com.sqzr.ccbbs.auth.shiro.cache.RedisSessionDAO">
-        <property name="redisManager" ref="redisManager"/>
-        <!-- 指定在redis中存放的session前缀名 -->
-        <property name="keyPrefix" value="ccbbs_shiro_session:"/>
+    <bean id="redisSessionDAO" class="com.sqzr.ccbbs.auth.shiro.cache.RedisShiroSessionDAO">
+        <property name="cached" ref="redisCached"/>
     </bean>
 
-    <!-- 缓存管理器 -->
-    <bean id="cacheManager" class="com.sqzr.ccbbs.auth.shiro.cache.RedisCacheManager">
-        <property name="redisManager" ref="redisManager"/>
-        <!-- 指定在redis中存放的缓存前缀名 -->
-        <property name="keyPrefix" value="ccbbs_shiro_cache:"/>
+
+    <bean id="shiroCacheManager" class="com.sqzr.ccbbs.auth.shiro.cache.RedisShiroCacheManager">
+        <property name="cached" ref="redisCached"/>
     </bean>
 
     <!-- 安全管理器 -->
     <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
         <property name="authenticator" ref="authenticator"/>
-        <property name="cacheManager" ref="cacheManager"/>
+        <property name="cacheManager" ref="shiroCacheManager"/>
         <property name="sessionManager" ref="sessionManager"/>
-        <property name="realm" ref="PhrRealm"/>
+        <property name="realm" ref="ccRealm"/>
     </bean>
 
     <!-- session管理器 -->
     <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
-        <property name="globalSessionTimeout" value="3600000"/>
         <property name="sessionDAO" ref="redisSessionDAO"/>
-        <!--<property name="sessionIdCookie" ref="wapsession"/>-->
         <property name="sessionValidationScheduler" ref="sessionValidationScheduler"/>
         <property name="sessionValidationSchedulerEnabled" value="true"/>
+        <property name="sessionValidationInterval" value="1800000"/>
+        <property name="globalSessionTimeout" value="${shiro.globalSessionTimeout}"/>
+        <property name="sessionIdCookie.name" value="${shiro.sessionIdCookie.name}"/>
     </bean>
 
     <!--
@@ -87,8 +59,8 @@
     <!-- shiro 过滤器 -->
     <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
         <property name="securityManager" ref="securityManager"/>
-        <property name="loginUrl" value="/auth/login"/>
-        <property name="unauthorizedUrl" value="/auth/unauthorized"/>
+        <property name="loginUrl" value="${shiro.loginUrl}"/>
+        <property name="unauthorizedUrl" value="${shiro.unauthorizedUrl}"/>
         <property name="filterChainDefinitions">
             <value>
                 /regional/doctor/** = user,roles[doctor]

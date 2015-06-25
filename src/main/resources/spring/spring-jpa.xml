@@ -14,14 +14,7 @@
     <!-- 加载src/main/resources下的属性文件 -->
     <!--<context:property-placeholder location="classpath:conf.properties"/>-->
 
-    <!-- 读取配置文件 -->
-    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="locations">
-            <list>
-                <value>classpath:conf.properties</value>
-            </list>
-        </property>
-    </bean>
+    <description>数据库相关 配置相关</description>
 
     <!-- 阿里 druid数据库连接池 -->
     <!-- 详细配置参数: https://github.com/alibaba/druid/wiki/DruidDataSource%E9%85%8D%E7%BD%AE%E5%B1%9E%E6%80%A7%E5%88%97%E8%A1%A8 -->
