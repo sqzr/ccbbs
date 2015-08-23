@@ -19,12 +19,13 @@
     <mvc:resources mapping="/resources/**" location="/resources/"/>
 
 
-    <!-- 配置SpringMVC的视图解析器,使用beetl做模板引擎 -->
-    <bean name="beetlConfig" class="org.beetl.ext.spring.BeetlGroupUtilConfiguration" init-method="init"/>
-    <bean name="beetlViewResolver" class="org.beetl.ext.spring.BeetlSpringViewResolver">
-        <property name="config" ref="beetlConfig"/>
-        <property name="contentType" value="text/html;charset=UTF-8"/>
+    <!-- jsp视图解析器 -->
+    <bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="prefix" value="/"/>
+        <property name="suffix" value=".jsp"/>
     </bean>
+
 
     <!-- 配置返回json支持 -->
     <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">

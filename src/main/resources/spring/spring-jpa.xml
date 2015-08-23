@@ -9,7 +9,6 @@
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"
        default-lazy-init="true">
-    <description>hibernate 配置相关</description>
 
     <!-- 加载src/main/resources下的属性文件 -->
     <!--<context:property-placeholder location="classpath:conf.properties"/>-->
@@ -68,6 +67,7 @@
         <property name="jpaProperties">
             <props>
                 <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
             </props>
         </property>
     </bean>
@@ -77,7 +77,7 @@
                       entity-manager-factory-ref="entityManagerFactory"/>
 
     <!-- 指定实现JPA的适配器 -->
-    <bean id="hibernateJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"></bean>
+    <bean id="hibernateJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
 
     <!-- Jpa 事务配置 -->
     <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">

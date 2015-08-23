@@ -3,6 +3,7 @@ package com.sqzr.ccbbs.auth.entity;
 import com.sqzr.ccbbs.core.base.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -10,8 +11,11 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 
 /**
- * Created by weiyang on 2015/6/11.
+ * CC_member 用户表,记录了用户的帐号密码等信息
+ *
+ * @author weiyang
  */
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @DynamicUpdate
 @Data
