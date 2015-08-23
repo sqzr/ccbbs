@@ -1,26 +1,34 @@
 package com.sqzr.ccbbs.auth.service;
 
 import com.sqzr.ccbbs.auth.entity.CcMember;
+import com.sqzr.ccbbs.auth.repository.MemberRepository;
+import com.sqzr.ccbbs.core.base.BaseRepository;
+import com.sqzr.ccbbs.core.service.BaseService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
- * 用户相关操作service
- * Created by weiyang on 2015/6/11.
+ * 用户服务类,操作用户表或用户基本信息
+ *
+ * @author weiyang
  */
-public interface MemberService {
-    /**
-     * 通过用户名查找
-     *
-     * @param username 用户名
-     * @return Member对象
-     */
-    public CcMember findByUsername(String username);
+@Service
+public class MemberService extends BaseService<CcMember,Integer> {
 
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Override
+    protected BaseRepository<CcMember, Integer> getEntityRepository() {
+        return memberRepository;
+    }
 
     /**
-     * 查找{@param username}在数据库中存在的个数
-     * 用于注册时判断是否已存在等.
-     *
-     * @return 存在个数
+     * 通过用户名查询用户
+     * @param username  用户名
+     * @return PhrMember
      */
-    public Integer countByUsername(String username);
+    public CcMember findByUsername(String username) {
+        return memberRepository.findByUsername(username);
+    }
 }

@@ -26,18 +26,18 @@ public class CcMemberInfo extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
+
+    // 字段: 个人网站
     @Basic
     @Column(name = "website")
     private String website;
+
+    // 字段: 所在公司
     @Basic
     @Column(name = "company")
     private String company;
-    @Basic
-    @Column(name = "tagline")
-    private String tagline;
-    @Basic
-    @Column(name = "bio")
-    private String bio;
+
+    // 字段: 头像地址
     @Basic
     @Column(name = "avatar")
     private String avatar;

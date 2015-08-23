@@ -6,7 +6,8 @@ import org.springframework.stereotype.Repository;
 
 /**
  * 用户操作相关repository
- * Created by weiyang on 2015/6/11.
+ *
+ * @author weiyang
  */
 @Repository("memberRepository")
 public interface MemberRepository extends BaseRepository<CcMember, Integer> {
